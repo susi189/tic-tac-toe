@@ -1,19 +1,21 @@
-const board = document.querySelector('.board');
+const boardSection = document.querySelector('.board');
 
 const gameBoard = (()=>{
    const createBoard = () => {
        //the board will be an aray of divs
-    let board = [];
-    let elem = 'o';
-    for(let i = 0; i<9; i++){
-        board.push(elem)
-    }
-    return board
+    let board = ['x','o','x','x','o','x','o','x','x'];
+    board.forEach(function(item){
+        let elem = document.createElement('div');
+        elem.innerText = item;
+        boardSection.appendChild(elem).setAttribute('id', 'element');
+    })
    }
    return {
        createBoard
    };
 })();
+
+gameBoard.createBoard();
 
 function Player(name, lastTurn){
     const getName = () => name;
