@@ -1,10 +1,14 @@
 .board {
   display: grid;
-  grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
 }
 
 #element {
   display: flex;
   justify-content: center;
   align-items: center;
+  width: auto;
+  height: 100px;
+  border: 1px solid;
 }
