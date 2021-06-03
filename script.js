@@ -5,11 +5,14 @@ let board = ['','','','','','','','',''];
 
 const gameBoard = (()=>{
 
-    let playerBtnX = document.createElement('button');
+    const playerBtnX = document.createElement('button');
     playerBtnX.innerText = 'Player X';
 
-    let playerBtnO = document.createElement('button');
+    const playerBtnO = document.createElement('button');
     playerBtnO.innerText = 'Player O';
+
+    const clearBtn = document.createElement('button');
+    clearBtn.innerText = 'Clear board'
 
 
     const updateBoard = (index, elem) => {
@@ -25,16 +28,17 @@ const gameBoard = (()=>{
     })
     section.appendChild(playerBtnX);
     section.appendChild(playerBtnO);
+    section.appendChild(clearBtn);
    }
 
-   const displayScore = () => {
+   const displayScore = (winner, score) => {
         let scoreBoard = document.createElement('div');
         scoreBoard.setAttribute('id', 'score-board');
 
         let pX = document.createElement('div');
-        pX.innerText = 'Player X Score: '
+        pX.innerText = 'Player X Score: ' + score;
         let pO = document.createElement('div');
-        pO.innerText = 'Player O Score: '
+        pO.innerText = 'Player O Score: ' + score
 
         section.appendChild(scoreBoard);
         scoreBoard.appendChild(pX);
@@ -43,11 +47,20 @@ const gameBoard = (()=>{
 
     playerBtnO.addEventListener('click', () => {
         playGame(playerO)
-    })
+    });
 
     playerBtnX.addEventListener('click', () => {
         playGame(playerX)
+    });
+
+    clearBtn.addEventListener('click', () => {
+        board = ['','','','','','','','',''];
+        let boardElem = document.querySelectorAll('.element');
+        boardElem.forEach((elem) => {
+            elem.innerText = '';
+        })
     })
+
 
    return {
         updateBoard,
@@ -61,32 +74,46 @@ gameBoard.displayBoard();
 gameBoard.displayScore();
 
 
-function Player(name){
-    const getName = () => name;
-    return {getName}
+function player(name, turn){
+    return {
+        name: name,
+        turn: turn,
+        totalScore: 0
+    }
 }
 
-const playerO = Player('O')
-const playerX = Player('X')
+
+//current turn - 1
+//not my turn - 0
+
+const playerO = player('O', 0)
+const playerX = player('X', 0)
 
 const playGame = (player) => {
     boardSection.addEventListener('click', (event) => {
         if(event.target.innerText === ''){
-            event.target.innerText = player.getName();
+            event.target.innerText = player.name;
             if(player === playerO){
+                playerO.myTurn = 1;
+                playerX.myTurn = 0;
                 player = playerX;
             } else if(player === playerX){
+                playerX.myTurn = 1;
+                playerO.myTurn = 0;
                 player = playerO;
             }
             gameBoard.updateBoard(event.target.id, event.target.innerText)
         }
+       if(checkFields(board)){
+          if(playerO.myTurn === 1){
+            playerO.totalScore ++
+          } else if(playerX.myTurn === 1){
+            playerX.totalScore ++
+          }
+       }
+
     }) 
-}
 
-
-
-const clearFields = () => {
-    
 }
 
 const getRows = (array) => {
@@ -133,6 +160,7 @@ const getDiagonals = (array) => {
 
 const checkSame = (array) => {
     let sameElem = 1;
+
       for(let i = 0; i < array.length; i++){
            for(let j = 0; j<2; j++){
            if(array[i][j] !== ''){
@@ -161,11 +189,10 @@ const checkFields = (array) => {
     let checkColums = checkSame(getColumns(array));
     let checkDiagonals = checkSame(getDiagonals(array));
     if(checkRows === true || checkColums === true || checkDiagonals === true){
-      return "done"
+      return true
     } else {
-      return 'even'
+        return false
     }
 }
 
-checkFields(board)
 
