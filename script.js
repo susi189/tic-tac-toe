@@ -3,6 +3,9 @@ const boardSection = document.querySelector('.board');
 
 let board = ['','','','','','','','',''];
 
+const playerO = createPlayer('O')
+const playerX = createPlayer('X')
+
 const gameBoard = (()=>{
 
     const playerBtnX = document.createElement('button');
@@ -11,38 +14,38 @@ const gameBoard = (()=>{
     const playerBtnO = document.createElement('button');
     playerBtnO.innerText = 'Player O';
 
-    const clearBtn = document.createElement('button');
-    clearBtn.innerText = 'Clear board'
+    const resetBtn = document.createElement('button');
+    resetBtn.innerText = 'Reset game'
 
+    const displayBoard = () => {
+        board.forEach(function(item, index){
+            let elem = document.createElement('div');
+            elem.innerText = item;
+            boardSection.appendChild(elem).setAttribute('class', 'element');
+            elem.setAttribute('id', index);
+        })
+        section.appendChild(playerBtnX).setAttribute('class', 'player-btn');
+        section.appendChild(playerBtnO).setAttribute('class', 'player-btn');
+        section.appendChild(resetBtn).setAttribute('class', 'reset-btn');
+    }
 
+    //update board during game
     const updateBoard = (index, elem) => {
         board[index] = elem;
-        console.log(board)
     }
-    const displayBoard = () => {
-    board.forEach(function(item, index){
-        let elem = document.createElement('div');
-        elem.innerText = item;
-        boardSection.appendChild(elem).setAttribute('class', 'element');
-        elem.setAttribute('id', index);
-    })
-    section.appendChild(playerBtnX);
-    section.appendChild(playerBtnO);
-    section.appendChild(clearBtn);
-   }
 
-   const displayScore = (winner, score) => {
-        let scoreBoard = document.createElement('div');
-        scoreBoard.setAttribute('id', 'score-board');
-
-        let pX = document.createElement('div');
-        pX.innerText = 'Player X Score: ' + score;
-        let pO = document.createElement('div');
-        pO.innerText = 'Player O Score: ' + score
-
-        section.appendChild(scoreBoard);
-        scoreBoard.appendChild(pX);
-        scoreBoard.appendChild(pO);
+    const resetGame = () => {
+        const winningElem = document.querySelectorAll('.element-winning');
+        if(winningElem !== undefined) {
+         winningElem.forEach((elem) => {
+            elem.setAttribute('class', 'element')
+        });   
+        }
+        board = ['','','','','','','','',''];
+        let boardElem = document.querySelectorAll('.element');
+        boardElem.forEach((elem) => {
+            elem.innerText = '';
+        })
     }
 
     playerBtnO.addEventListener('click', () => {
@@ -53,118 +56,92 @@ const gameBoard = (()=>{
         playGame(playerX)
     });
 
-    clearBtn.addEventListener('click', () => {
-        board = ['','','','','','','','',''];
-        let boardElem = document.querySelectorAll('.element');
-        boardElem.forEach((elem) => {
-            elem.innerText = '';
-        })
-    })
-
+    resetBtn.addEventListener('click', () => {
+       resetGame();
+    });
 
    return {
         updateBoard,
-        displayBoard,
-        displayScore
+        displayBoard
    };
 })();
 
 
-gameBoard.displayBoard();
-gameBoard.displayScore();
-
-
-function player(name, turn){
+function createPlayer(name){
     return {
         name: name,
-        turn: turn,
-        totalScore: 0
+        winner: 1
     }
 }
 
-
-//current turn - 1
-//not my turn - 0
-
-const playerO = player('O', 0)
-const playerX = player('X', 0)
 
 const playGame = (player) => {
-    boardSection.addEventListener('click', (event) => {
+    boardSection.addEventListener('click', function play(event) {
+        let currentPlayer = player;
         if(event.target.innerText === ''){
             event.target.innerText = player.name;
-            if(player === playerO){
-                playerO.myTurn = 1;
-                playerX.myTurn = 0;
-                player = playerX;
-            } else if(player === playerX){
-                playerX.myTurn = 1;
-                playerO.myTurn = 0;
-                player = playerO;
-            }
             gameBoard.updateBoard(event.target.id, event.target.innerText)
+            if(player === playerO){
+                player = playerX
+            } else if( player === playerX){
+                player = playerO
+            }
+        } 
+        if(checkSame(board)){
+           currentPlayer.winner = 1;
+           markWinningLine();
+           declareWinner(currentPlayer);
+           boardSection.removeEventListener('click', play)
         }
-       if(checkFields(board)){
-          if(playerO.myTurn === 1){
-            playerO.totalScore ++
-          } else if(playerX.myTurn === 1){
-            playerX.totalScore ++
-          }
-       }
-
-    }) 
-
+    });
 }
 
-const getRows = (array) => {
-    let rows = [];
-    for(let i=0; i<array.length -1; i++){
-      let singleRow = [];
-        for(let j=0; j<3; j++){
-            singleRow.push(array[i+j])
+const declareWinner = (currentPlayer) => {
+    const banner = document.createElement('div');
+    banner.setAttribute('id', 'announcement');
+
+    if(currentPlayer.winner = 1){
+        banner.innerText = 'The Winner is ..... ' + currentPlayer.name;
+    } else {
+        banner.innerText = 'Even'
+    }
+    section.appendChild(banner)
+}
+
+const markWinningLine = () => {
+    const getElem = document.querySelectorAll('.element');
+    const winningLine = checkSame(board);
+    for(let i = 0; i < winningLine.length; i++){
+        for(let j = 0; j < getElem.length; j++){
+            if(winningLine[i] == getElem[j].id){
+                getElem[j].setAttribute('class', 'element-winning');
+            }
         }
-        rows.push(singleRow)
-        i=i+2
     }
-  return rows
+    
 }
 
-const getColumns = (array) => {
-  let columns = [];
-  for(let i=0; i<3; i++){
-    let singleColumn = [];
-    for(let j=0; j<3;j++){
-      singleColumn.push(array[i+(j*3)])
-    }
-    columns.push(singleColumn)
-  }
-  return columns
-}
+const winningCombos = [
+// rows
+[0, 1, 2],
+[3, 4, 5],
+[6, 7, 8],
+// columns
+[0, 3, 6], 
+[1, 4, 7],
+[2, 5, 8],
+// diagonals
+[0, 4, 8],
+[2, 4, 6]
 
+];
 
-const getDiagonals = (array) => {
-  let diagonals = [];
-  let firstDiagonal = [];
-  let secondDiagonal = [];
-  for(let i=0; i<array.length; i++){
-    firstDiagonal.push(array[i]);
-    i = i + 3
-  }
-  for(let j=2; j<array.length-1; j++){
-    secondDiagonal.push(array[j])
-    j = j+1
-  }
-  diagonals.push(firstDiagonal, secondDiagonal);
-  return diagonals
-}
-
-const checkSame = (array) => {
+const checkSame = (boardArray) => {
     let sameElem = 1;
-
-      for(let i = 0; i < array.length; i++){
-           for(let j = 0; j<2; j++){
-           if(array[i][j] !== ''){
-              if(array[i][j] === array[i][j+1]){
+      for(let i = 0; i < winningCombos.length; i++){
+           for(let j = 0; j < 2; j++){
+           if(boardArray[winningCombos[i][j]] !== ''){
+              if(boardArray[winningCombos[i][j]] === boardArray[winningCombos[i][j+1]]){
                 sameElem ++
               }
             }
@@ -172,27 +149,11 @@ const checkSame = (array) => {
         if(sameElem < 3){
           sameElem = 1;
         } else if(sameElem === 3) {
-          break;
-        }
+          return winningCombos[i]
+        } 
      }
-    if(sameElem === 3){
-        return true
-    } 
-    else {
-        return false
-    }
+     return false 
 }
 
 
-const checkFields = (array) => {
-    let checkRows = checkSame(getRows(array));
-    let checkColums = checkSame(getColumns(array));
-    let checkDiagonals = checkSame(getDiagonals(array));
-    if(checkRows === true || checkColums === true || checkDiagonals === true){
-      return true
-    } else {
-        return false
-    }
-}
-
-
+gameBoard.displayBoard();
