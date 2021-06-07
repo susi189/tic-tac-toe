@@ -6,6 +6,13 @@ let board = ['','','','','','','','',''];
 const playerO = createPlayer('O')
 const playerX = createPlayer('X')
 
+function createPlayer(name){
+    return {
+        name: name,
+        winner: 1
+    }
+}
+
 const gameBoard = (()=>{
 
     const playerBtnX = document.createElement('button');
@@ -34,126 +41,133 @@ const gameBoard = (()=>{
         board[index] = elem;
     }
 
-    const resetGame = () => {
+    const _resetGame = () => {
+        const announcement = document.getElementById('announcement')
+        board = ['','','','','','','','',''];
+
         const winningElem = document.querySelectorAll('.element-winning');
         if(winningElem !== undefined) {
          winningElem.forEach((elem) => {
             elem.setAttribute('class', 'element')
         });   
         }
-        board = ['','','','','','','','',''];
+
         let boardElem = document.querySelectorAll('.element');
         boardElem.forEach((elem) => {
             elem.innerText = '';
-        })
+        });
+
+        playerO.winner = 0;
+        playerX.winner = 0;
+
+        section.removeChild(announcement);
+
     }
 
     playerBtnO.addEventListener('click', () => {
-        playGame(playerO)
+        theGame.playGame(playerO)
     });
 
     playerBtnX.addEventListener('click', () => {
-        playGame(playerX)
+        theGame.playGame(playerX)
     });
 
     resetBtn.addEventListener('click', () => {
-       resetGame();
+       _resetGame();
     });
 
    return {
         updateBoard,
-        displayBoard
+        displayBoard,
    };
 })();
 
 
-function createPlayer(name){
+const theGame = (()=> {
+    const winningCombos = [
+    // rows
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    // columns
+    [0, 3, 6], 
+    [1, 4, 7],
+    [2, 5, 8],
+    // diagonals
+    [0, 4, 8],
+    [2, 4, 6]
+
+    ];
+
+    const _checkSame = (boardArray) => {
+        let sameElem = 1;
+        for(let i = 0; i < winningCombos.length; i++){
+            for(let j = 0; j < 2; j++){
+            if(boardArray[winningCombos[i][j]] !== ''){
+                if(boardArray[winningCombos[i][j]] === boardArray[winningCombos[i][j+1]]){
+                    sameElem ++
+                }
+                }
+            }
+            if(sameElem < 3){
+            sameElem = 1;
+            } else if(sameElem === 3) {
+            return winningCombos[i]
+            } 
+        }
+        return false 
+    }
+
+    const _declareWinner = (currentPlayer) => {
+        const banner = document.createElement('div');
+        banner.setAttribute('id', 'announcement');
+
+        if(currentPlayer.winner = 1){
+            banner.innerText = 'The Winner is ..... ' + currentPlayer.name;
+        } else {
+            banner.innerText = 'Even'
+        }
+        section.appendChild(banner)
+    }
+
+    const _markWinningLine = () => {
+        const getElem = document.querySelectorAll('.element');
+        const winningLine = _checkSame(board);
+        for(let i = 0; i < winningLine.length; i++){
+            for(let j = 0; j < getElem.length; j++){
+                if(winningLine[i] == getElem[j].id){
+                    getElem[j].setAttribute('class', 'element-winning');
+                }
+            }
+        }
+    }
+
+    const playGame = (player) => {
+        boardSection.addEventListener('click', function play(event) {
+            let currentPlayer = player;
+            if(event.target.innerText === ''){
+                event.target.innerText = player.name;
+                gameBoard.updateBoard(event.target.id, event.target.innerText)
+                if(player === playerO){
+                    player = playerX
+                } else if( player === playerX){
+                    player = playerO
+                }
+            } 
+            if(_checkSame(board)){
+                currentPlayer.winner = 1;
+                _markWinningLine();
+                _declareWinner(currentPlayer);
+                boardSection.removeEventListener('click', play);
+            }
+        });
+    }
+
     return {
-        name: name,
-        winner: 1
+        playGame
     }
-}
 
-
-const playGame = (player) => {
-    boardSection.addEventListener('click', function play(event) {
-        let currentPlayer = player;
-        if(event.target.innerText === ''){
-            event.target.innerText = player.name;
-            gameBoard.updateBoard(event.target.id, event.target.innerText)
-            if(player === playerO){
-                player = playerX
-            } else if( player === playerX){
-                player = playerO
-            }
-        } 
-        if(checkSame(board)){
-           currentPlayer.winner = 1;
-           markWinningLine();
-           declareWinner(currentPlayer);
-           boardSection.removeEventListener('click', play)
-        }
-    });
-}
-
-const declareWinner = (currentPlayer) => {
-    const banner = document.createElement('div');
-    banner.setAttribute('id', 'announcement');
-
-    if(currentPlayer.winner = 1){
-        banner.innerText = 'The Winner is ..... ' + currentPlayer.name;
-    } else {
-        banner.innerText = 'Even'
-    }
-    section.appendChild(banner)
-}
-
-const markWinningLine = () => {
-    const getElem = document.querySelectorAll('.element');
-    const winningLine = checkSame(board);
-    for(let i = 0; i < winningLine.length; i++){
-        for(let j = 0; j < getElem.length; j++){
-            if(winningLine[i] == getElem[j].id){
-                getElem[j].setAttribute('class', 'element-winning');
-            }
-        }
-    }
-    
-}
-
-const winningCombos = [
-// rows
-[0, 1, 2],
-[3, 4, 5],
-[6, 7, 8],
-// columns
-[0, 3, 6], 
-[1, 4, 7],
-[2, 5, 8],
-// diagonals
-[0, 4, 8],
-[2, 4, 6]
-
-];
-
-const checkSame = (boardArray) => {
-    let sameElem = 1;
-      for(let i = 0; i < winningCombos.length; i++){
-           for(let j = 0; j < 2; j++){
-           if(boardArray[winningCombos[i][j]] !== ''){
-              if(boardArray[winningCombos[i][j]] === boardArray[winningCombos[i][j+1]]){
-                sameElem ++
-              }
-            }
-          }
-        if(sameElem < 3){
-          sameElem = 1;
-        } else if(sameElem === 3) {
-          return winningCombos[i]
-        } 
-     }
-     return false 
-}
+})();
 
 
 gameBoard.displayBoard();
