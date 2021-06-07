@@ -1,3 +1,16 @@
+body {
+  font-family: "Baloo Tammudu 2", cursive;
+}
+
+section {
+  margin: 100px;
+}
+
+h1 {
+  font-size: 3em;
+  text-align: center;
+}
+
 button {
   margin: 10px;
 }
@@ -6,6 +19,8 @@ button {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
+  margin-bottom: 30px;
+  font-size: 2em;
 }
 
 .element {
@@ -25,4 +40,12 @@ button {
   height: 100px;
   border: 1px solid;
   background-color: tomato;
+}
+
+.info {
+  font-size: 1.5em;
+}
+
+#announcement {
+  font-size: 4em;
 }

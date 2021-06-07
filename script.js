@@ -23,6 +23,9 @@ const gameBoard = (()=>{
 
     const resetBtn = document.createElement('button');
     resetBtn.innerText = 'Reset game'
+    
+    const info = document.createElement('div');
+    info.innerText = 'To start a game choose a player'
 
     const displayBoard = () => {
         board.forEach(function(item, index){
@@ -31,6 +34,7 @@ const gameBoard = (()=>{
             boardSection.appendChild(elem).setAttribute('class', 'element');
             elem.setAttribute('id', index);
         })
+        section.appendChild(info).setAttribute('class', 'info');
         section.appendChild(playerBtnX).setAttribute('class', 'player-btn');
         section.appendChild(playerBtnO).setAttribute('class', 'player-btn');
         section.appendChild(resetBtn).setAttribute('class', 'reset-btn');
@@ -123,7 +127,7 @@ const theGame = (()=> {
         banner.setAttribute('id', 'announcement');
 
         if(currentPlayer.winner = 1){
-            banner.innerText = 'The Winner is ..... ' + currentPlayer.name;
+            banner.innerText = 'The Winner is ..... Player ' + currentPlayer.name;
         } else {
             banner.innerText = 'Even'
         }
