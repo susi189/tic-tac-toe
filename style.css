@@ -4,6 +4,7 @@ body {
 
 section {
   margin: 100px;
+  margin-top: 50px;
 }
 
 h1 {
@@ -42,10 +43,16 @@ button {
   background-color: tomato;
 }
 
-.info {
-  font-size: 1.5em;
+.element-even {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: auto;
+  height: 100px;
+  border: 1px solid;
+  background-color: yellowgreen;
 }
 
-#announcement {
-  font-size: 4em;
+.info {
+  font-size: 1.5em;
 }

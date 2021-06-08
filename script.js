@@ -1,15 +1,15 @@
-const section = document.querySelector('section')
+const section = document.querySelector('section');
 const boardSection = document.querySelector('.board');
 
 let board = ['','','','','','','','',''];
 
-const playerO = createPlayer('O')
-const playerX = createPlayer('X')
+const playerO = createPlayer('O');
+const playerX = createPlayer('X');
 
 function createPlayer(name){
     return {
         name: name,
-        winner: 1
+        winner: 0
     }
 }
 
@@ -22,10 +22,10 @@ const gameBoard = (()=>{
     playerBtnO.innerText = 'Player O';
 
     const resetBtn = document.createElement('button');
-    resetBtn.innerText = 'Reset game'
+    resetBtn.innerText = 'Reset game';
     
     const info = document.createElement('div');
-    info.innerText = 'To start a game choose a player'
+    info.innerText = 'To start a game choose a player';
 
     const displayBoard = () => {
         board.forEach(function(item, index){
@@ -46,17 +46,23 @@ const gameBoard = (()=>{
     }
 
     const _resetGame = () => {
-        const announcement = document.getElementById('announcement')
         board = ['','','','','','','','',''];
 
         const winningElem = document.querySelectorAll('.element-winning');
         if(winningElem !== undefined) {
-         winningElem.forEach((elem) => {
-            elem.setAttribute('class', 'element')
-        });   
+            winningElem.forEach((elem) => {
+                elem.setAttribute('class', 'element')
+            });   
         }
 
-        let boardElem = document.querySelectorAll('.element');
+        const evenElem = document.querySelectorAll('.element-even')
+         if(evenElem !== undefined) {
+            evenElem.forEach((elem) => {
+                elem.setAttribute('class', 'element')
+            });   
+        }
+
+        const boardElem = document.querySelectorAll('.element');
         boardElem.forEach((elem) => {
             elem.innerText = '';
         });
@@ -64,16 +70,14 @@ const gameBoard = (()=>{
         playerO.winner = 0;
         playerX.winner = 0;
 
-        section.removeChild(announcement);
-
     }
 
     playerBtnO.addEventListener('click', () => {
-        theGame.playGame(playerO)
+        theGame.playGame(playerO);
     });
 
     playerBtnX.addEventListener('click', () => {
-        theGame.playGame(playerX)
+        theGame.playGame(playerX);
     });
 
     resetBtn.addEventListener('click', () => {
@@ -107,31 +111,35 @@ const theGame = (()=> {
         let sameElem = 1;
         for(let i = 0; i < winningCombos.length; i++){
             for(let j = 0; j < 2; j++){
-            if(boardArray[winningCombos[i][j]] !== ''){
-                if(boardArray[winningCombos[i][j]] === boardArray[winningCombos[i][j+1]]){
-                    sameElem ++
-                }
+                if(boardArray[winningCombos[i][j]] !== ''){
+                    if(boardArray[winningCombos[i][j]] === boardArray[winningCombos[i][j+1]]){
+                        sameElem ++
+                    }
                 }
             }
             if(sameElem < 3){
-            sameElem = 1;
+                sameElem = 1;
             } else if(sameElem === 3) {
-            return winningCombos[i]
+                return winningCombos[i];
             } 
         }
         return false 
     }
 
-    const _declareWinner = (currentPlayer) => {
-        const banner = document.createElement('div');
-        banner.setAttribute('id', 'announcement');
-
-        if(currentPlayer.winner = 1){
-            banner.innerText = 'The Winner is ..... Player ' + currentPlayer.name;
-        } else {
-            banner.innerText = 'Even'
+    const _checkFreeFields = () => {
+        const elem = document.querySelectorAll('.element');
+        let countEmptyFields = 0;
+        console.log(countEmptyFields)
+        for(let i = 0; i<board.length; i++){
+            if(board[i] === ''){
+                countEmptyFields ++
+            } 
         }
-        section.appendChild(banner)
+        if(countEmptyFields === 0){
+            elem.forEach((e) => {
+                e.setAttribute('class', 'element-even');
+            });
+        }
     }
 
     const _markWinningLine = () => {
@@ -153,17 +161,17 @@ const theGame = (()=> {
                 event.target.innerText = player.name;
                 gameBoard.updateBoard(event.target.id, event.target.innerText)
                 if(player === playerO){
-                    player = playerX
+                    player = playerX;
                 } else if( player === playerX){
-                    player = playerO
+                    player = playerO;
                 }
             } 
             if(_checkSame(board)){
                 currentPlayer.winner = 1;
                 _markWinningLine();
-                _declareWinner(currentPlayer);
                 boardSection.removeEventListener('click', play);
-            }
+            } 
+            _checkFreeFields()
         });
     }
 
