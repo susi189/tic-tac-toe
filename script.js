@@ -5,11 +5,12 @@ let board = ["", "", "", "", "", "", "", "", ""];
 
 const playerO = createPlayer("O");
 const playerX = createPlayer("X");
-const computerPlayer = createPlayer("0");
+// const computerPlayer = createPlayer("O");
 
 function createPlayer(name) {
   return {
     name: name,
+    winner: 0,
   };
 }
 
@@ -20,14 +21,15 @@ const gameBoard = (() => {
   const playerBtnO = document.createElement("button");
   playerBtnO.innerText = "Player O";
 
-  const computerPlayerBtn = document.createElement("button");
-  computerPlayerBtn.innerText = "computerPlayer";
+  // const computerPlayerBtn = document.createElement("button");
+  // computerPlayerBtn.innerText = "computerPlayer";
 
   const resetBtn = document.createElement("button");
   resetBtn.innerText = "Reset game";
 
   const info = document.createElement("div");
-  info.innerText = "To start a game choose a player";
+  info.innerText =
+    "This is a game for two players. To start the game the first player needs to choose either Player X or Player O";
 
   const displayBoard = () => {
     board.forEach(function (item, index) {
@@ -78,9 +80,10 @@ const gameBoard = (() => {
     theGame.playGame(playerX);
   });
 
-  computerPlayer.addEventListener("click", () => {
-    theGame.playGame(playerX);
-  });
+  // computerPlayerBtn.addEventListener("click", () => {
+  //   theGame.playGame(playerX);
+  // });
+
   resetBtn.addEventListener("click", () => {
     _resetGame();
   });
