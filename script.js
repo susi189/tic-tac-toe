@@ -5,12 +5,12 @@ let board = ["", "", "", "", "", "", "", "", ""];
 
 const playerO = createPlayer("O");
 const playerX = createPlayer("X");
-// const computerPlayer = createPlayer("O");
+const playerMe = createPlayer("x");
+const computerPlayer = createPlayer("O");
 
 function createPlayer(name) {
   return {
     name: name,
-    winner: 0,
   };
 }
 
@@ -21,8 +21,8 @@ const gameBoard = (() => {
   const playerBtnO = document.createElement("button");
   playerBtnO.innerText = "Player O";
 
-  // const computerPlayerBtn = document.createElement("button");
-  // computerPlayerBtn.innerText = "computerPlayer";
+  const computerPlayerBtn = document.createElement("button");
+  computerPlayerBtn.innerText = "Computer Player";
 
   const resetBtn = document.createElement("button");
   resetBtn.innerText = "Reset game";
@@ -41,6 +41,7 @@ const gameBoard = (() => {
     section.appendChild(info).setAttribute("class", "info");
     section.appendChild(playerBtnX).setAttribute("class", "player-btn");
     section.appendChild(playerBtnO).setAttribute("class", "player-btn");
+    section.appendChild(computerPlayerBtn).setAttribute("class", "player-btn");
     section.appendChild(resetBtn).setAttribute("class", "reset-btn");
   };
 
@@ -80,9 +81,10 @@ const gameBoard = (() => {
     theGame.playGame(playerX);
   });
 
-  // computerPlayerBtn.addEventListener("click", () => {
-  //   theGame.playGame(playerX);
-  // });
+  computerPlayerBtn.addEventListener("click", () => {
+    theGame.playGame(computerPlayer);
+    section.removeChild(playerBtnO);
+  });
 
   resetBtn.addEventListener("click", () => {
     _resetGame();
@@ -131,7 +133,35 @@ const theGame = (() => {
     return false;
   };
 
-  const _checkFreeFields = () => {
+  const _computeNextCompMove = (boardArray) => {
+    let sameElem = 1;
+    let myArray = [];
+    for (let i = 0; i < winningCombos.length; i++) {
+      for (let j = 0; j < 2; j++) {
+        if (boardArray[winningCombos[i][j]] === "O") {
+          if (
+            boardArray[winningCombos[i][j]] ===
+              boardArray[winningCombos[i][j + 1]] ||
+            boardArray[winningCombos[i][j]] ===
+              boardArray[winningCombos[i][j + 2]]
+          ) {
+            sameElem++;
+          }
+        }
+      }
+      if (sameElem === 2) {
+        myArray = winningCombos[i];
+        for (let k = 0; k < 2; k++) {
+          if (boardArray[myArray[k]] === "") {
+            return myArray[k];
+          }
+        }
+      }
+    }
+    return false;
+  };
+
+  const _checkIfGameOver = () => {
     const elem = document.querySelectorAll(".element");
     let countEmptyFields = 0;
     for (let i = 0; i < board.length; i++) {
@@ -158,23 +188,45 @@ const theGame = (() => {
     }
   };
 
+  const getRandomField = (min, max) => {
+    return Math.floor(Math.random() * (max - min) + min);
+  };
+
+  const computerMove = () => {
+    let chosenFieldId = board.indexOf("");
+    let selectedField = document.getElementById(chosenFieldId);
+    selectedField.innerText = "O";
+    gameBoard.updateBoard(chosenFieldId, "O");
+  };
+
   const playGame = (player) => {
-    boardSection.addEventListener("click", function play(event) {
+    if (player === computerPlayer) {
+      computerMove();
+      player = playerMe;
+    }
+
+    const playerMove = (event) => {
       if (event.target.innerText === "") {
         event.target.innerText = player.name;
         gameBoard.updateBoard(event.target.id, event.target.innerText);
-        if (player === playerO) {
-          player = playerX;
-        } else if (player === playerX) {
-          player = playerO;
-        }
+      }
+
+      if (player === playerX) {
+        player = playerO;
+      } else if (player === playerO) {
+        player = playerX;
+      } else if (player === playerMe) {
+        computerMove();
       }
       if (_checkSame(board)) {
         _markWinningLine();
-        boardSection.removeEventListener("click", play);
+        boardSection.removeEventListener("click", playerMove);
       }
-      _checkFreeFields();
-    });
+
+      _checkIfGameOver();
+    };
+
+    boardSection.addEventListener("click", playerMove);
   };
 
   return {
